@@ -28,7 +28,6 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
 router.use('/auth', authRoutes);
-router.use(moduleRoutes)
 router.use('/v1', donationRoutes)
 router.use('/v1', hundiRoutes)
 router.use('/v1', defineHundiRoutes)
@@ -36,26 +35,19 @@ router.use('/v1', hundiBankDepositRoutes)
 router.use('/v1', inventoryRoutes)
 router.use('/v1', inventoryUsedRoutes)
 
-router.use("/sub-modules", subModuleRoutes)
-router.use(
-  "/subscription-plans",
-  subscriptionPlanRoutes,
-);
-router.use(
-  "/subscription-bundles",
-  subscriptionBundleRoutes,
-);
+// Admin routes: the frontend calls these both with and without the /v1 prefix,
+// so mount them under both.
+for (const prefix of ["", "/v1"]) {
+  router.use(prefix || "/", moduleRoutes)
+  router.use(`${prefix}/sub-modules`, subModuleRoutes)
+  router.use(`${prefix}/subscription-plans`, subscriptionPlanRoutes)
+  router.use(`${prefix}/subscription-bundles`, subscriptionBundleRoutes)
+  router.use(`${prefix}/organizations`, organizationRoutes)
+  router.use(`${prefix}/system-defaults`, systemDefaultsRoutes)
+  router.use(`${prefix}/roles`, roleRoutes)
+}
 
-router.use(
-  "/organizations",
-  organizationRoutes,
-)
-router.use(
-  "/system-defaults",
-  systemDefaultsRoutes,
-)
-router.use(
-  "/roles",
-  roleRoutes,
-)
+// Hundi/donation forms call /v1/organization/organizations/:id
+router.use("/v1/organization/organizations", organizationRoutes)
+
 export default router
