@@ -31,6 +31,6 @@ components → reusable UI
 pages → screens/routes
 
 Api  
-module http://localhost:5000/api/v1/modules?page=2&limit=10
-submodule http://localhost:5000/api/v1/sub-modules
-subscription-plans   http://localhost:5000/api/v1/subscription-plans
+module https://tms2-beta.vercel.app/api/v1/modules?page=2&limit=10
+submodule https://tms2-beta.vercel.app/api/v1/sub-modules
+subscription-plans   https://tms2-beta.vercel.app/api/v1/subscription-plans
