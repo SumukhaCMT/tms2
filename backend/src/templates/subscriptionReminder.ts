@@ -8,14 +8,14 @@ interface SubscriptionReminderProps {
   renewLink: string;
 }
 
-export const subscriptionReminderTemplate = ({
+export const subscriptionReminderTemplate = async ({
   organizationName,
   planName,
   expiryDate,
   daysLeft,
   renewLink,
 }: SubscriptionReminderProps) => {
-  const { html } = mjml2html(`
+  const { html } = await mjml2html(`
 <mjml>
   <mj-head>
     <mj-title>Subscription Renewal Reminder</mj-title>
