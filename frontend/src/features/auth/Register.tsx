@@ -53,7 +53,7 @@ export default function OrganizationForm() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/v1/organizations/register",
+        `${import.meta.env.VITE_API_URL}/v1/organizations/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

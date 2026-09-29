@@ -21,6 +21,7 @@ app.use(
      origin: [
       "http://localhost:5173",
       "https://tms-frontend-wine.vercel.app",
+      "https://tms2-beta.vercel.app",
     ],
     
     credentials: true,
