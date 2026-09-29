@@ -1,0 +1,36 @@
+features/
+└── organizations/
+    ├── pages/
+    │   ├── Organizations.tsx
+    │   ├── AddOrganization.tsx
+    │   ├── EditOrganizations.tsx
+    │   └── ViewOrganizations.tsx
+    │
+    ├── components/
+    │   ├── OrganizationsTable.tsx
+    │   └── OrganizationForm.tsx
+    │
+    ├── services/
+    │   └── organizationService.ts
+    │
+    ├── organizationSlice.ts
+    ├── organizationThunks.ts
+    ├── organizationSelectors.ts
+    ├── organizationTypes.ts
+    └── organizationValidation.ts
+
+Simple rule:
+
+services → talk to API
+thunks → coordinate async API + Redux
+slice → store/update state
+selectors → read state
+types → TypeScript types
+validation → form validation
+components → reusable UI
+pages → screens/routes
+
+Api  
+module http://localhost:5000/api/v1/modules?page=2&limit=10
+submodule http://localhost:5000/api/v1/sub-modules
+subscription-plans   http://localhost:5000/api/v1/subscription-plans

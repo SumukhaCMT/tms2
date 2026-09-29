@@ -1,0 +1,117 @@
+
+2. Backend feature structure
+backend/
+├── src/
+│   ├── config/
+│   │   ├── database.ts
+│   │   ├── env.ts
+│   │   └── logger.ts
+│   │
+│   ├── middleware/
+│   │   ├── authMiddleware.ts
+│   │   ├── roleMiddleware.ts
+│   │   ├── validationMiddleware.ts
+│   │   ├── errorMiddleware.ts
+│   │   └── notFoundMiddleware.ts
+│   │
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── controllers/
+│   │   │   ├── services/
+│   │   │   ├── repositories/
+│   │   │   ├── routes/
+│   │   │   ├── validations/
+│   │   │   ├── authTypes.ts
+│   │   │   └── __tests__/
+│   │   │
+│   │   ├── organizations/
+│   │   │   ├── controllers/
+│   │   │   ├── services/
+│   │   │   ├── repositories/
+│   │   │   ├── routes/
+│   │   │   ├── validations/
+│   │   │   ├── organizationTypes.ts
+│   │   │   └── __tests__/
+│   │   │
+│   │   ├── users/
+│   │   ├── temples/
+│   │   ├── deities/
+│   │   ├── sevas/
+│   │   ├── sevaBookings/
+│   │   ├── donations/
+│   │   ├── payments/
+│   │   ├── subscriptions/
+│   │   ├── trustees/
+│   │   └── tokens/
+│   │
+│   ├── routes/
+│   │   └── index.ts
+│   │
+│   ├── utils/
+│   │   ├── jwt.ts
+│   │   ├── password.ts
+│   │   ├── response.ts
+│   │   └── pagination.ts
+│   │
+│   ├── types/
+│   │   └── express.d.ts
+│   │
+│   ├── app.ts
+│   └── server.ts
+│
+├── tests/
+├── .env
+├── .env.example
+├── .gitignore
+├── eslint.config.mjs
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+└── vitest.config.ts
+
+ Example For Organizations:
+
+organizations/
+├── controllers/
+│   └── organizationController.ts
+│
+├── services/
+│   └── organizationService.ts
+│
+├── repositories/
+│   └── organizationRepository.ts
+│
+├── routes/
+│   └── organizationRoutes.ts
+│
+├── validations/
+│   └── organizationValidation.ts
+│
+├── organizationTypes.ts
+│
+└── __tests__/
+    ├── organizationController.test.ts
+    ├── organizationService.test.ts
+    └── organizationRepository.test.ts
+Backend flow
+Request
+   ↓
+Route
+   ↓
+Middleware
+   ↓
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ↓
+MySQL
+Responsibility
+Route       → URL/API endpoint
+Controller  → req/res
+Service     → business logic
+Repository  → SQL/database
+Validation  → validate input
+Types       → TypeScript types
+Middleware  → auth/role/error handling
