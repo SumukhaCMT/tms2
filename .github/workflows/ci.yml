@@ -1,0 +1,220 @@
+
+name: TMS CI RUN TESTS RUN LINT, BUILD AND DOCKER BUILD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+# Allow the workflow to merge changes into main.
+permissions:
+  contents: write
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --run
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: 3306
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check environment
+        run: |
+          echo "DB_HOST configured: ${{ secrets.DB_HOST != '' }}"
+          echo "DB_NAME configured: ${{ secrets.DB_NAME != '' }}"
+          echo "DB_USERNAME configured: ${{ secrets.DB_USERNAME != '' }}"
+          echo "DB_PASSWORD configured: ${{ secrets.DB_PASSWORD != '' }}"
+          echo "JWT_SECRET configured: ${{ secrets.JWT_SECRET != '' }}"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test -- --run
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+
+    needs:
+      - frontend
+      - backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check Docker files
+        run: |
+          echo "Repository files:"
+          ls -la
+          echo "Docker files:"
+          find . -maxdepth 3 -type f \
+            \( -name "docker-compose.yml" \
+            -o -name "compose.yml" \
+            -o -name "Dockerfile" \)
+
+      - name: Verify Docker Compose
+        run: test -f docker-compose.yml
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker images
+        run: docker compose -f docker-compose.yml build
+
+  merge-to-main:
+    name: Merge main into main
+    runs-on: ubuntu-latest
+
+    needs:
+      - frontend
+      - backend
+      - docker
+
+    # Only merge after successful CI on a push to main.
+    # Pull-request runs only validate the code.
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.frontend.result == 'success' &&
+      needs.backend.result == 'success' &&
+      needs.docker.result == 'success'
+
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into main
+        run: |
+          set -e
+
+          git fetch origin main main
+
+          git checkout -B main origin/main
+
+          git merge --no-ff origin/main \
+            -m "Merge main into main after successful CI"
+
+          git push origin main
+
+  send-email-notification:
+    name: Send Merge Success Email
+    runs-on: ubuntu-latest
+
+    needs:
+      - merge-to-main
+
+    if: needs.merge-to-main.result == 'success'
+
+    steps:
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+
+          subject: "TMS -  CI/CD Merge Successful"
+
+          to: rajeshwarikm@codemythought.com,gkrao@codemythought.com,connect@codemythought.com,sumukha.n@codemythought.com
+
+          from: TMS  <${{ secrets.MAIL_USERNAME }}>
+
+          body: |
+            Hello Team,
+
+            The TMS CI/CD  workflow completed successfully.
+
+            Details:
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Triggered By: ${{ github.actor }}
+
+            Frontend:
+            Lint, Test and Build - SUCCESS
+
+            Backend:
+            Lint, Test and Build - SUCCESS
+
+            Docker:
+            Docker Build - SUCCESS
+
+            Merge:
+            Merge to main - SUCCESS
+
+            Thank you,
+            TMS Development Team
