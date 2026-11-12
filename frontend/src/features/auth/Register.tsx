@@ -53,7 +53,7 @@
 
 //     try {
 //       const res = await fetch(
-//         "http://localhost:5001/api/v1/organizations/register",
+//         "https://backend-gamma-six-47.vercel.app/api/v1/organizations/register",
 //         {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },

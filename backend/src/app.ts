@@ -25,7 +25,7 @@ app.use(
   cors({
    
     origin: [
-      "http://localhost:5173",
+      "https://tms2-beta.vercel.app",
       "https://tms-frontend-wine.vercel.app",
     ],
 
