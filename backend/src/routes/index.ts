@@ -2,7 +2,6 @@ import { Router } from "express"
 import { httpsRedirect } from "../middleware/httpsRedirect.middleware";
 import cookieParser from "cookie-parser";
 import express from "express";
-import cors from "cors";
 import authRoutes from '../features/auth/routes/auth.routes';
 // import organizationRoutes from "../features/organizations/routes/organizationRoutes"
 import moduleRoutes from "../features/modules/routes/moduleRoutes"
@@ -45,7 +44,6 @@ import devoteeRoutes from "../features/devotee/routes/devoteeRoutes";
 const router = Router()
 
 router.use(httpsRedirect);
-router.use(cors({ origin: process.env.CLIENT_URL, methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], credentials: true }));
 router.use(cookieParser());
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));

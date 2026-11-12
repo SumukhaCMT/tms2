@@ -6,11 +6,17 @@ import mjml2html from 'mjml';
 import fs from 'fs';
 import path from 'path';
 
-const REFRESH_COOKIE_OPTIONS = {
+// Frontend and backend live on different *.vercel.app sites (cross-site),
+// so the refresh cookie must be SameSite=None + Secure in production.
+const isProd = process.env.NODE_ENV === 'production';
+const REFRESH_COOKIE_BASE = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/api/auth',
+  secure: isProd,
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
+  path: '/api/auth'
+};
+const REFRESH_COOKIE_OPTIONS = {
+  ...REFRESH_COOKIE_BASE,
   maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
@@ -60,7 +66,7 @@ export const refresh = async (req: Request, res: Response) => {
   if (result.error === 'SESSION_REVOKED') return res.status(401).json({ message: 'Session ended', code: 'SESSION_REVOKED' });
 
   if (result.error) {
-    res.clearCookie('refresh_token', { path: '/api/auth' });
+    res.clearCookie('refresh_token', REFRESH_COOKIE_BASE);
     return res.status(401).json({ message: 'Session expired, please login again' });
   }
 
@@ -73,7 +79,7 @@ export const logout = async (req: Request, res: Response) => {
 
   const revoked = token ? await logoutUser(token) : false;
 
-  if (revoked) res.clearCookie('refresh_token', { path: '/api/auth' });
+  if (revoked) res.clearCookie('refresh_token', REFRESH_COOKIE_BASE);
   res.json({ success: true });
 };
 

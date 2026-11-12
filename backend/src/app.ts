@@ -19,19 +19,35 @@ app.set("trust proxy", 1)
 // Security
 // ============================
 
+// CORS must run first so every response (including errors and
+// preflight OPTIONS) carries the Access-Control-* headers.
+const allowedOrigins = [
+  "https://tms2-beta.vercel.app",
+  "https://tms-frontend-wine.vercel.app",
+  ...(process.env.CLIENT_URL || "")
+    .split(",")
+    .map((o) => o.trim().replace(/\/$/, ""))
+    .filter(Boolean),
+]
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests (curl, server-to-server) with no Origin header
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(null, false)
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 204,
+  maxAge: 86400,
+}
+
+app.use(cors(corsOptions))
+app.options(/.*/, cors(corsOptions))
+
 app.use(helmet())
 
-app.use(
-  cors({
-   
-    origin: [
-      "https://tms2-beta.vercel.app",
-      "https://tms-frontend-wine.vercel.app",
-    ],
-
-    credentials: true,
-  }),
-)
 // ============================
 // Body Parser
 // MUST come before routes
